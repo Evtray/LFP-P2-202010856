@@ -135,11 +135,10 @@ class Ap:
                     if not search[4] == '$':
                         stack.append(search[4])
 
-                    print(stack)
                     state = search[3]
                     self.last_route.insert(0, search)
                     self.last_transtions.insert(
-                        0, [count, [] + stack, rletter, transition])
+                        0, [count, [] + stack, rletter, search])
                 else:
                     return False
             else:
@@ -205,3 +204,54 @@ class Ap:
             f'dot.exe -Tpdf dots/{name}.dot -o pdfs/{name}.pdf')
 
         return True
+
+    def generateDotPass(self, index):
+        last_transtions = self.last_transtions
+        rtransition = last_transtions[index - 1]
+        name = self.name.replace(' ', '')
+        name = name + "pass" + str(index)
+
+        dot = f'digraph {name} {"{"} \n'
+        # add padding to graph
+        dot += f'node [style=filled, color=lightblue2, fontcolor=black, shape=box]; \n'
+        dot += f'layout=dot; rankdir=LR; shape=circle \n'
+        active = rtransition[3][0] == self.initial_state 
+        fill = active and 'style=filled, fillcolor=yellow' or ''
+        dot += f'{self.initial_state} [{fill} shape = circle]; \n'
+        for state in self.states:
+            active = rtransition[3][0] == state 
+            fill = active and 'style=filled, fillcolor=yellow' or ''
+            if not state == self.initial_state:
+                if state == self.acceptance_state:
+                    dot += f'{state} [{fill} shape = doublecircle]; \n'
+                else:
+                    dot += f'{state} [{fill} shape = circle]; \n'
+        #      I -> A [label = "λ,λ;#"];
+        for transition in self.transitions:
+            active = rtransition[3][0] == transition[1] 
+            font = active and 'fontcolor=red' or ''
+            dot += f'{transition[0]} -> {transition[3]} [{font} label="{transition[1]},{transition[2]};{transition[4]}"]; \n'
+
+        rtransition[1].reverse()
+        temp1 = ""
+        for transition2 in rtransition[1]:
+            temp1 += f'{transition2}'
+
+        temp2 = ""
+        for transition2 in rtransition[2]:
+            temp2 += f'{transition2},'
+        temp2 = temp2[:-1]
+
+        dot += f'"Pila: {temp1} \n'
+        dot += f'Entrada: {temp2} \n'
+
+        dot += f'" [shape=box] {"}"}'
+
+        document = open(f'dots/{name}.dot', 'w', encoding='utf-8')
+        document.write(dot)
+        document.close()
+
+        os.system(
+            f'dot.exe -Tpng dots/{name}.dot -o pngs/{name}.png')
+
+        return f'pngs/{name}.png'

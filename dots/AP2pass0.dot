@@ -1,0 +1,15 @@
+digraph AP2pass0 { 
+node [style=filled, color=lightblue2, fontcolor=black, shape=box]; 
+layout=dot; rankdir=LR; shape=circle 
+S0 [ shape = circle]; 
+S1 [ shape = circle]; 
+S2 [style=filled, fillcolor=yellow shape = circle]; 
+S3 [ shape = doublecircle]; 
+S0 -> S1 [ label="$,$;#"]; 
+S1 -> S1 [ label="x,$;x"]; 
+S1 -> S2 [ label="y,x;$"]; 
+S2 -> S2 [ label="y,x;$"]; 
+S2 -> S3 [ label="$,#;$"]; 
+"Pila:  
+Entrada: # 
+" [shape=box] }

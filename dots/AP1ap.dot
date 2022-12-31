@@ -12,7 +12,7 @@ B -> B [label = "a,$;a"];
 B -> C [label = "b,a;$"]; 
 C -> C [label = "b,a;$"]; 
 C -> F [label = "$,#;$"]; 
-"Nombre: AP 1 
+"Nombre: AP1 
 Alfabeto: a,b 
 Simbolos: a,b,# 
 Estados: I,A,B,C,F 

@@ -22,27 +22,11 @@ class App(customtkinter.CTk):
         # init lists
         self.grs = []
         self.aps = []
-
+        self.count = 0
+        self.ap = None
         # add gr to list
-        self.grs.append(Gr("GR 1", ["S", "A", "B", "C"], ["a", "b", "z"], "S", [], [
-            GrProduction("S", ["A"]),
-            GrProduction("A", ["a", "A", "a"]),
-            GrProduction("A", ["B"]),
-            GrProduction("B", ["b", "B", "b"]),
-            GrProduction("B", ["C"]),
-            GrProduction("C", ["z", "C"]),
-            GrProduction("C", ["z"]),
-        ]))
-        self.aps.append(Ap("AP 1", ["a", "b"], ["a", "b", "#"], ["I", "A", "B", "C", "F"], "I", "F", [
-            ["I", "$", "$", "A", "#"],
-            ["A", "a", "$", "B", "a"],
-            ["B", "a", "$", "B", "a"],
-            ["B", "b", "a", "C", "$"],
-            ["C", "b", "a", "C", "$"],
-            ["C", "$", "#", "F", "$"]
-        ]))
-        
-        self.title("Proyecto 1 - 202010856")
+
+        self.title("Proyecto 2 - 202010856")
         self.geometry(f"{1400}x{700}")
 
         self.grid_columnconfigure(1, weight=1)
@@ -72,8 +56,7 @@ class App(customtkinter.CTk):
         self.progressbar_1.grid(row=5, column=4, columnspan=10, padx=(
             20, 10), pady=(10, 10), sticky="ew")
         self.progressbar_1.set(0)
-        self.initFrame()
-        # threading.Thread(target=self.load_init).start()
+        threading.Thread(target=self.load_init).start()
 
     def load_init(self):
         actual = 0
@@ -108,8 +91,7 @@ class App(customtkinter.CTk):
 
         self.label_alert = None
 
-        self.frameAutomatas()
-        self.frameAutomatasShow()
+        self.frameMain()
 
     def frameMain(self):
         self.content_frame.grid_remove()
@@ -425,7 +407,7 @@ class App(customtkinter.CTk):
         self.sidebar_button_2.grid(row=3, column=0, padx=20, pady=10)
 
         self.sidebar_button_4 = customtkinter.CTkButton(
-            self.sidebar_options, text="Recorrido paso a paso", command=self.frameAutomatasFile)
+            self.sidebar_options, text="Recorrido paso a paso", command=self.frameAutomatasStepByStep)
         self.sidebar_button_4.grid(row=5, column=0, padx=20, pady=10)
 
         self.content_frame_sub = customtkinter.CTkFrame(self.content_frame)
@@ -483,7 +465,7 @@ class App(customtkinter.CTk):
             elif state == 3:
                 states = self.replaceSpacing(line)
                 states = states.split(",")
-                state = 4
+                state = 5
             elif state == 5:
                 initial_state = self.replaceSpacing(line)
                 state = 6
@@ -502,9 +484,16 @@ class App(customtkinter.CTk):
                     if flag:
                         self.aps.append(
                             Ap(name, alphabet, simbols, states, initial_state, acceptance_state, transitions))
+                    transitions = []
+                    state = 0
+                    flag = True
+
                 else:
                     line = self.replaceSpacing(line)
+                    # separar por comas o puntos y comas
                     line = line.split(",")
+                    sep = line[2].split(";")
+                    line = [line[0], line[1], sep[0], sep[1], line[3]]
                     transitions.append(line)
 
         self.success("Grs creados con exito")
@@ -556,7 +545,7 @@ class App(customtkinter.CTk):
         self.success("Archivo generado con exito")
 
     def frameAutomataValidate(self):
-                # esconder alerta
+        # esconder alerta
         if self.label_alert is not None:
             self.label_alert.grid_forget()
 
@@ -628,7 +617,7 @@ class App(customtkinter.CTk):
             if ap_item.name == self.automatas_optionemenu.get():
                 ap = ap_item
                 break
-                
+
         if ap is not None:
             text = self.text_evaluate.get()
             text = self.replaceSpacing(text)
@@ -658,7 +647,8 @@ class App(customtkinter.CTk):
             text = self.replaceSpacing(text)
             if text != "":
                 if ap.validateString(text):
-                    self.textbox.insert("1.0", str(ap.validateStringRoute()) +  "\n")
+                    self.textbox.insert("1.0", str(
+                        ap.validateStringRoute()) + "\n")
                     self.success("Cadena válida")
                 else:
                     self.alert("Cadena no válida")
@@ -692,6 +682,126 @@ class App(customtkinter.CTk):
         else:
             self.alert("Seleccione un autómata")
 
+    def frameAutomatasStepByStep(self):
+        if self.label_alert is not None:
+            self.label_alert.grid_forget()
+
+        self.content_frame_sub.grid_remove()
+        self.content_frame_sub = customtkinter.CTkFrame(self.content_frame)
+        self.content_frame_sub.grid(row=0, column=1,  rowspan=7, padx=(
+            20, 20), pady=(20, 20), sticky="nsew")
+        self.content_frame_sub.grid_rowconfigure(10, weight=1)
+        self.content_frame_sub.grid_columnconfigure(1, weight=1)
+        # border radius content frame
+
+        self.label_title = customtkinter.CTkLabel(
+            master=self.content_frame_sub, text="Evaluar Cadena", font=customtkinter.CTkFont(size=20, weight="bold"), justify=tkinter.LEFT)
+        self.label_title.grid(row=0, column=0,
+                              padx=10, pady=10, sticky="nsew", )
+
+        self.afds_label = customtkinter.CTkLabel(
+            self.content_frame_sub, text="Autómatas", anchor="w")
+        self.afds_label.grid(row=1, column=0, padx=10, pady=10,)
+
+        # recorrer los afds y agregarlos al menu
+        values_menu = []
+        for ap in self.aps:
+            values_menu.append(ap.name)
+
+        self.automatas_optionemenu = customtkinter.CTkOptionMenu(
+            self.content_frame_sub, values=values_menu)
+        self.automatas_optionemenu.grid(
+            row=1, column=1, padx=10, pady=10, sticky="ew")
+
+        self.label_evaluate = customtkinter.CTkLabel(
+            master=self.content_frame_sub, text="Cadena", justify=tkinter.LEFT)
+        self.label_evaluate.grid(
+            row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.text_evaluate = customtkinter.CTkEntry(
+            master=self.content_frame_sub, width=30)
+        self.text_evaluate.grid(
+            row=2, column=1, padx=10, pady=10, columnspan=9, sticky="nsew")
+
+        self.button_evaluate = customtkinter.CTkButton(
+            master=self.content_frame_sub, text="Validar", command=self.validateStringStepByStep)
+        self.button_evaluate.grid(
+            row=3, column=4, padx=10, pady=10, sticky="nsew")
+
+    def validateStringStepByStep(self):
+        if self.label_alert is not None:
+            self.label_alert.grid_forget()
+
+        for ap_item in self.aps:
+            if ap_item.name == self.automatas_optionemenu.get():
+                self.ap = ap_item
+                break
+
+        if self.ap is not None:
+            text = self.text_evaluate.get()
+            text = self.replaceSpacing(text)
+            if text != "":
+                if self.ap.validateStringOnePass(text):
+                    self.count = 0
+                    response = self.ap.generateDotPass(self.count)
+                    
+                    self.button_route = customtkinter.CTkButton(
+                        master=self.content_frame_sub, text="Siguiente", command=self.nextRoute)
+                    self.button_route.grid(
+                        row=4, column=2, padx=10, pady=10, sticky="nsew")
+
+                    self.button_route = customtkinter.CTkButton(
+                        master=self.content_frame_sub, text="Anterior", command=self.previousRoute)
+                    self.button_route.grid(
+                        row=4, column=3, padx=10, pady=10, sticky="nsew")
+
+
+                    self.image = Image.open(response)
+                    # set width 600
+                    width_percent = (600 / float(self.image.size[0]))
+                    hsize = int(
+                        (float(self.image.size[1]) * float(width_percent)))
+                    self.image = self.image.resize(
+                        (600, hsize), Image.ANTIALIAS)
+
+                    self.image = ImageTk.PhotoImage(self.image)
+                    self.label_image = customtkinter.CTkLabel(
+                        self.content_frame_sub, image=self.image)
+                    self.label_image.grid(row=5, column=0, columnspan=4, padx=(
+                        20, 0), pady=(20, 0), sticky="nsew")
+
+                else:
+                    self.alert("Cadena no válida")
+            else:
+                self.alert("Ingrese una cadena")
+        else:
+            self.alert("Seleccione un autómata")
+
+    def previousRoute(self):
+        if self.count > 0:
+            self.count -= 1
+            response = self.ap.generateDotPass(self.count)
+            self.image = Image.open(response)
+            # set width 600
+            width_percent = (600 / float(self.image.size[0]))
+            hsize = int((float(self.image.size[1]) * float(width_percent)))
+            self.image = self.image.resize((600, hsize), Image.ANTIALIAS)
+            self.image = ImageTk.PhotoImage(self.image)
+            self.label_image.configure(image=self.image)
+            self.label_image.image = self.image
+
+    def nextRoute(self):
+        if self.count < len(self.ap.states) - 1:
+            self.count += 1
+            response = self.ap.generateDotPass(self.count)
+            self.image = Image.open(response)
+            # set width 600
+            width_percent = (600 / float(self.image.size[0]))
+            hsize = int((float(self.image.size[1]) * float(width_percent)))
+            self.image = self.image.resize((600, hsize), Image.ANTIALIAS)
+            self.image = ImageTk.PhotoImage(self.image)
+            self.label_image.configure(image=self.image)
+            self.label_image.image = self.image
+
     def replaceSpacing(self, text):
         text = text.replace(" ", "")
         text = text.replace("\n", "")
@@ -702,7 +812,6 @@ class App(customtkinter.CTk):
         self.destroy()
 
     def alert(self, title):
-        print("alert", title)
         self.label_alert = customtkinter.CTkLabel(
             master=self.content_frame_sub, text=title, fg_color=("red", "#f5c2c7"), corner_radius=5,  text_color="#842029", font=customtkinter.CTkFont(size=15, weight="bold"), justify=tkinter.LEFT)
         self.label_alert.grid(

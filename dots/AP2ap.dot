@@ -1,0 +1,25 @@
+digraph AP2ap { 
+node [style=filled, color=lightblue2, fontcolor=black, shape=box]; 
+layout=dot; rankdir=LR; shape=circle 
+S0 [shape = circle]; 
+S1 [shape = circle]; 
+S2 [shape = circle]; 
+S3 [shape = doublecircle]; 
+S0 -> S1 [label = "$,$;#"]; 
+S1 -> S1 [label = "x,$;x"]; 
+S1 -> S2 [label = "y,x;$"]; 
+S2 -> S2 [label = "y,x;$"]; 
+S2 -> S3 [label = "$,#;$"]; 
+"Nombre: AP2 
+Alfabeto: x,y 
+Simbolos: x,y,# 
+Estados: S0,S1,S2,S3 
+Estado inicial: S0 
+Estado de aceptacion: S3 
+Transiciones: 
+S0,$,$,S1,# 
+S1,x,$,S1,x 
+S1,y,x,S2,$ 
+S2,y,x,S2,$ 
+S2,$,#,S3,$ 
+" [shape=box] }

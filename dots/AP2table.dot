@@ -1,0 +1,9 @@
+digraph AP2table { 
+AP1 [fillcolor = "#ff880022";label = <<table border="0" cellborder="1" cellspacing="0" cellpadding="20"> 
+<tr> <td> <b>Iteración</b> </td> <td> Pila</td> <td> Entrada</td> <td> Transición</td> </tr> 
+<tr> <td> 0 </td> <td>  </td> <td>  </td> <td> S0,$,$,S1,# </td> </tr> 
+<tr> <td> 1 </td> <td> x# </td> <td> x </td> <td> S1,x,$,S1,x </td> </tr> 
+<tr> <td> 2 </td> <td> # </td> <td> xy </td> <td> S1,y,x,S2,$ </td> </tr> 
+<tr> <td> 3 </td> <td>  </td> <td> # </td> <td> S2,$,#,S3,$ </td> </tr> 
+</table>>;shape = plain;]; 
+}
